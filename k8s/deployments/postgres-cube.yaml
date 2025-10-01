@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-cube
+  namespace: stcs
+  labels:
+    app: postgres-cube
+    component: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-cube
+  template:
+    metadata:
+      labels:
+        app: postgres-cube
+        component: database
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: "cube"
+        - name: POSTGRES_USER
+          value: "cube"
+        - name: POSTGRES_PASSWORD
+          value: "cube123"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - cube
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - cube
+          initialDelaySeconds: 30
+          periodSeconds: 30
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-cube-pvc
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-cube-pvc
+  namespace: stcs
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard-rwo
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-cube
+  namespace: stcs
+  labels:
+    app: postgres-cube
+spec:
+  selector:
+    app: postgres-cube
+  ports:
+  - port: 5432
+    targetPort: 5432
+    protocol: TCP
+  type: ClusterIP

@@ -1,0 +1,127 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cube
+  namespace: stcs
+  labels:
+    app: cube
+    component: semantic-layer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cube
+  template:
+    metadata:
+      labels:
+        app: cube
+        component: semantic-layer
+    spec:
+      containers:
+      - name: cube
+        image: cubejs/cube:latest
+        ports:
+        - containerPort: 4000
+          name: api
+        - containerPort: 3001
+          name: dev-dashboard
+        - containerPort: 15432
+          name: sql-api
+        env:
+        - name: CUBEJS_DEV_MODE
+          value: "true"
+        - name: CUBEJS_API_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: database-secrets
+              key: cube-api-secret
+        - name: CUBEJS_DB_TYPE
+          value: "trino"
+        - name: CUBEJS_DB_HOST
+          value: "trino-coordinator"
+        - name: CUBEJS_DB_PORT
+          value: "8080"
+        - name: CUBEJS_DB_USER
+          value: "admin"
+        - name: CUBEJS_DB_PRESTO_CATALOG
+          value: "postgresql"
+        - name: CUBEJS_DB_SCHEMA
+          value: "public"
+        - name: CUBEJS_DB_NAME
+          value: "public"
+        - name: CUBEJS_SQL_PORT
+          value: "15432"
+        - name: CUBEJS_PG_SQL_PORT
+          value: "15432"
+        - name: CUBEJS_SQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: database-secrets
+              key: cube-sql-user
+        - name: CUBEJS_SQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: database-secrets
+              key: cube-sql-password
+        - name: CUBEJS_CACHE_AND_QUEUE_DRIVER
+          value: "memory"
+        - name: NODE_ENV
+          value: "development"
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "500m"
+          limits:
+            memory: "4Gi"
+            cpu: "1000m"
+        volumeMounts:
+        - name: cube-config-volume
+          mountPath: /cube/conf/cube.js
+          subPath: cube.js
+        - name: cube-models-volume
+          mountPath: /cube/conf/model
+        readinessProbe:
+          httpGet:
+            path: /cubejs-api/v1/meta
+            port: 4000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /cubejs-api/v1/meta
+            port: 4000
+          initialDelaySeconds: 60
+          periodSeconds: 30
+      volumes:
+      - name: cube-config-volume
+        configMap:
+          name: cube-config
+      - name: cube-models-volume
+        configMap:
+          name: cube-models
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cube
+  namespace: stcs
+  labels:
+    app: cube
+spec:
+  selector:
+    app: cube
+  ports:
+  - port: 4000
+    targetPort: 4000
+    protocol: TCP
+    name: api
+  - port: 3001
+    targetPort: 3001
+    protocol: TCP
+    name: dev-dashboard
+  - port: 15432
+    targetPort: 15432
+    protocol: TCP
+    name: sql-api
+  type: ClusterIP

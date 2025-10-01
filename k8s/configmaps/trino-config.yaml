@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trino-config
+  namespace: stcs
+data:
+  config.properties: |
+    coordinator=true
+    node-scheduler.include-coordinator=true
+    http-server.http.port=8080
+    discovery.uri=http://localhost:8080
+  
+  node.properties: |
+    node.environment=production
+    node.id=ffffffff-ffff-ffff-ffff-ffffffffffff
+    node.data-dir=/tmp/trino
+  
+  jvm.config: |
+    -server
+    -Xmx4G
+    -XX:InitialRAMPercentage=80
+    -XX:MaxRAMPercentage=80
+    -XX:G1HeapRegionSize=32M
+    -XX:+UseG1GC
+    -XX:+UseGCOverheadLimit
+    -XX:+ExplicitGCInvokesConcurrent
+    -XX:+HeapDumpOnOutOfMemoryError
+    -XX:+ExitOnOutOfMemoryError
+    -XX:ReservedCodeCacheSize=512M
+    -XX:PerMethodRecompilationCutoff=10000
+    -XX:PerBytecodeRecompilationCutoff=10000
+    -Djdk.attach.allowAttachSelf=true
+    -Djdk.nio.maxCachedBufferSize=2000000
+    -Dfile.encoding=UTF-8
+    --add-opens=java.base/java.nio=ALL-UNNAMED
+  
+  log.properties: |
+    io.trino=INFO
+  
+  postgresql.properties: |
+    connector.name=postgresql
+    connection-url=jdbc:postgresql://34.121.94.89:5432/sales_db
+    connection-user=airbyte_user
+    connection-password=airbyte_password
+  
+  snowflake.properties: |
+    connector.name=snowflake
+    connection-url=jdbc:snowflake://BBVMZPQ-KA84846.snowflakecomputing.com/?user=OMER&warehouse=COMPUTE_WH&db=SNOWFLAKE_LEARNING_DB&schema=PUBLIC&role=ACCOUNTADMIN
+    connection-user=OMER
+    connection-password=Ok4@mrteragonia

@@ -1,0 +1,105 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: stcs-ingress
+  namespace: stcs
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: "stcs-static-ip"
+    networking.gke.io/managed-certificates: "stcs-ssl-cert"
+    kubernetes.io/ingress.allow-http: "true"
+  labels:
+    app: stcs-data-architecture
+spec:
+  rules:
+  - host: stcs.yourdomain.com  # Replace with your actual domain
+    http:
+      paths:
+      - path: /trino
+        pathType: Prefix
+        backend:
+          service:
+            name: trino-coordinator
+            port:
+              number: 8080
+      - path: /cube
+        pathType: Prefix
+        backend:
+          service:
+            name: cube
+            port:
+              number: 4000
+      - path: /dev
+        pathType: Prefix
+        backend:
+          service:
+            name: cube
+            port:
+              number: 3001
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: cube
+            port:
+              number: 4000
+
+---
+# Managed SSL Certificate for HTTPS
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: stcs-ssl-cert
+  namespace: stcs
+spec:
+  domains:
+    - stcs.yourdomain.com  # Replace with your actual domain
+
+---
+# Load Balancer Services for external access
+apiVersion: v1
+kind: Service
+metadata:
+  name: trino-coordinator-lb
+  namespace: stcs
+  labels:
+    app: trino-coordinator
+  annotations:
+    cloud.google.com/load-balancer-type: "External"
+spec:
+  selector:
+    app: trino-coordinator
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  type: LoadBalancer
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cube-lb
+  namespace: stcs
+  labels:
+    app: cube
+  annotations:
+    cloud.google.com/load-balancer-type: "External"
+spec:
+  selector:
+    app: cube
+  ports:
+  - port: 4000
+    targetPort: 4000
+    protocol: TCP
+    name: api
+  - port: 3001
+    targetPort: 3001
+    protocol: TCP
+    name: dev-dashboard
+  - port: 15432
+    targetPort: 15432
+    protocol: TCP
+    name: sql-api
+  type: LoadBalancer

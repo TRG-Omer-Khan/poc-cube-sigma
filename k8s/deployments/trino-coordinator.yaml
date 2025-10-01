@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trino-coordinator
+  namespace: stcs
+  labels:
+    app: trino-coordinator
+    component: query-engine
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: trino-coordinator
+  template:
+    metadata:
+      labels:
+        app: trino-coordinator
+        component: query-engine
+    spec:
+      containers:
+      - name: trino
+        image: trinodb/trino:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: TRINO_NODE_TYPE
+          value: "coordinator"
+        resources:
+          requests:
+            memory: "4Gi"
+            cpu: "1000m"
+          limits:
+            memory: "8Gi"
+            cpu: "2000m"
+        volumeMounts:
+        - name: trino-config-volume
+          mountPath: /etc/trino
+        - name: trino-catalog-volume
+          mountPath: /etc/trino/catalog
+        readinessProbe:
+          httpGet:
+            path: /v1/info
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /v1/info
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+      volumes:
+      - name: trino-config-volume
+        configMap:
+          name: trino-config
+          items:
+          - key: config.properties
+            path: config.properties
+          - key: node.properties
+            path: node.properties
+          - key: jvm.config
+            path: jvm.config
+          - key: log.properties
+            path: log.properties
+      - name: trino-catalog-volume
+        configMap:
+          name: trino-config
+          items:
+          - key: postgresql.properties
+            path: postgresql.properties
+          - key: snowflake.properties
+            path: snowflake.properties
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: trino-coordinator
+  namespace: stcs
+  labels:
+    app: trino-coordinator
+spec:
+  selector:
+    app: trino-coordinator
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  type: ClusterIP

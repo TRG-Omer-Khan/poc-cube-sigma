@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: ServiceMonitor
+metadata:
+  name: stcs-monitoring
+  namespace: stcs
+  labels:
+    app: stcs-monitoring
+spec:
+  selector:
+    matchLabels:
+      component: query-engine
+  endpoints:
+  - port: http
+    path: /v1/info
+    interval: 30s
+
+---
+# HorizontalPodAutoscaler for Cube.js
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: cube-hpa
+  namespace: stcs
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: cube
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+# HorizontalPodAutoscaler for Trino
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: trino-hpa
+  namespace: stcs
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: trino-coordinator
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 80
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 85
