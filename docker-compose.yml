@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # Trino Coordinator - Query Engine
+  trino-coordinator:
+    image: trinodb/trino:latest
+    container_name: trino-coordinator
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./trino-config:/etc/trino
+      - ./trino-config/catalog:/etc/trino/catalog
+    networks:
+      - stcs-network
+    environment:
+      - TRINO_NODE_TYPE=coordinator
+
+  # Cube.js - Semantic Layer
+  cube:
+    image: cubejs/cube:latest
+    container_name: cube
+    ports:
+      - "4000:4000"      # Cube API
+      - "3001:3001"      # Cube Dev Dashboard
+      - "15432:15432"    # SQL API port
+    environment:
+      - CUBEJS_DEV_MODE=true
+      - CUBEJS_API_SECRET=your-secret-key-change-in-production
+      - CUBEJS_DB_TYPE=trino
+      - CUBEJS_DB_HOST=trino-coordinator
+      - CUBEJS_DB_PORT=8080
+      - CUBEJS_DB_USER=admin
+      - CUBEJS_DB_PRESTO_CATALOG=postgresql
+      - CUBEJS_DB_SCHEMA=public
+      - CUBEJS_DB_NAME=public
+      - CUBEJS_SQL_PORT=15432
+      - CUBEJS_PG_SQL_PORT=15432
+      - CUBEJS_SQL_USER=cube
+      - CUBEJS_SQL_PASSWORD=stcs-production-secret-2024
+      - CUBEJS_CACHE_AND_QUEUE_DRIVER=memory
+      - NODE_ENV=development
+    volumes:
+      - ./model:/cube/conf/model
+      - ./cube.js:/cube/conf/cube.js
+    depends_on:
+      - trino-coordinator
+    networks:
+      - stcs-network
+
+  # PostgreSQL for Cube.js metadata storage
+  postgres-cube:
+    image: postgres:15
+    container_name: postgres-cube
+    environment:
+      - POSTGRES_DB=cube
+      - POSTGRES_USER=cube
+      - POSTGRES_PASSWORD=cube123
+    volumes:
+      - postgres-cube-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - stcs-network
+
+networks:
+  stcs-network:
+    driver: bridge
+
+volumes:
+  postgres-cube-data:

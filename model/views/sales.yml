@@ -1,0 +1,58 @@
+views:
+  - name: sales
+    description: "A unified view for sales analysis."
+
+    cubes:
+      # Base orders cube - no prefix needed
+      - join_path: orders
+        includes:
+          - count
+          - order_status
+          - order_date
+          - order_id
+          - payment_status
+          - payment_method
+          - total_revenue
+          - avg_order_value
+          - completed_orders
+          - pending_orders
+          - shipping_country
+          - shipping_state
+          - shipping_city
+
+      # Customers cube with prefix to avoid conflicts
+      - join_path: orders.customers
+        prefix: true
+        includes:
+          - company
+          - email
+          - city
+          - country
+          - lead_source
+          - customer_id
+          - count
+          - lead_status
+          - industry
+          - first_name
+          - last_name
+
+      # Order items with prefix
+      - join_path: orders.order_items
+        prefix: true
+        includes:
+          - count
+          - total_amount
+          - total_quantity
+          - avg_quantity_per_item
+
+      # Products through order_items with prefix
+      - join_path: orders.order_items.products
+        prefix: true
+        includes:
+          - product_name
+          - sku
+          - category
+          - subcategory
+          - brand
+          - price
+          - is_active

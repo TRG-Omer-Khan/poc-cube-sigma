@@ -1,0 +1,131 @@
+cubes:
+  - name: products
+    sql_table: postgresql.public.products
+
+    joins: []
+
+    dimensions:
+      - name: product_id
+        sql: product_id
+        type: number
+        primary_key: true
+
+      - name: inventory_quantity
+        sql: inventory_quantity
+        type: number
+
+      - name: reorder_level
+        sql: reorder_level
+        type: number
+
+      - name: sku
+        sql: sku
+        type: string
+
+      - name: product_name
+        sql: product_name
+        type: string
+
+      - name: product_description
+        sql: product_description
+        type: string
+
+      - name: category
+        sql: category
+        type: string
+
+      - name: subcategory
+        sql: subcategory
+        type: string
+
+      - name: brand
+        sql: brand
+        type: string
+
+      - name: price
+        sql: CAST(price AS DECIMAL(10,2))
+        type: number
+
+      - name: cost
+        sql: CAST(cost AS DECIMAL(10,2))
+        type: number
+
+      - name: currency
+        sql: currency
+        type: string
+
+      - name: weight
+        sql: weight
+        type: string
+
+      - name: dimensions
+        sql: dimensions
+        type: string
+
+      - name: is_active
+        sql: is_active
+        type: boolean
+
+      - name: tags
+        sql: tags
+        type: string
+
+      - name: metadata
+        sql: metadata
+        type: string
+
+      - name: created_at
+        sql: created_at
+        type: time
+
+      - name: updated_at
+        sql: updated_at
+        type: time
+
+      - name: launch_date
+        sql: launch_date
+        type: time
+
+      - name: discontinue_date
+        sql: discontinue_date
+        type: time
+
+    measures:
+      - name: count
+        type: count
+      
+      - name: total_inventory_value
+        type: sum
+        sql: "{CUBE.inventory_quantity} * CAST({CUBE.price} AS DECIMAL(10,2))"
+      
+      - name: avg_price
+        type: avg
+        sql: CAST(price AS DECIMAL(10,2))
+      
+      - name: avg_cost
+        type: avg
+        sql: CAST(cost AS DECIMAL(10,2))
+      
+      - name: total_inventory_quantity
+        type: sum
+        sql: inventory_quantity
+      
+      - name: products_below_reorder
+        type: count
+        filters:
+          - sql: "{CUBE.inventory_quantity} <= {CUBE.reorder_level}"
+
+    pre_aggregations:
+      - name: products_inventory_rollup
+        measures:
+          - count
+          - total_inventory_value
+          - total_inventory_quantity
+          - products_below_reorder
+        dimensions:
+          - category
+          - subcategory
+          - brand
+          - is_active
+        refresh_key:
+          every: 30 minutes

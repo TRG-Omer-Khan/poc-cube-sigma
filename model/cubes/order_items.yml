@@ -1,0 +1,98 @@
+cubes:
+  - name: order_items
+    sql_table: postgresql.public.order_items
+
+    joins:
+      - name: orders
+        sql: "{CUBE.order_id} = {orders.order_id}"
+        relationship: many_to_one
+
+      - name: products
+        sql: "{CUBE.product_id} = {products.product_id}"
+        relationship: many_to_one
+
+    dimensions:
+      - name: item_id
+        sql: item_id
+        type: number
+        primary_key: true
+
+      - name: order_id
+        sql: order_id
+        type: number
+
+      - name: product_id
+        sql: product_id
+        type: number
+      
+      - name: product_name
+        sql: "{products.product_name}"
+        type: string
+
+      - name: quantity
+        sql: quantity
+        type: number
+
+      - name: unit_price
+        sql: unit_price
+        type: number
+
+      - name: discount_percent
+        sql: CAST(discount_percent AS DECIMAL(5,2))
+        type: number
+
+      - name: tax_rate
+        sql: CAST(tax_rate AS DECIMAL(5,2))
+        type: number
+
+      - name: total_price
+        sql: CAST(total_price AS DECIMAL(10,2))
+        type: number
+
+      - name: notes
+        sql: notes
+        type: string
+
+      - name: created_at
+        sql: created_at
+        type: time
+
+    measures:
+      - name: count
+        type: count
+      
+      - name: total_quantity
+        type: sum
+        sql: quantity
+      
+      - name: total_amount
+        description: "The total amount for all line items"
+        type: sum
+        sql: "{CUBE.quantity} * {CUBE.unit_price}"
+      
+      - name: total_discount_amount
+        type: sum
+        sql: "{CUBE.quantity} * {CUBE.unit_price} * {CUBE.discount_percent} / 100"
+      
+      - name: avg_quantity_per_item
+        type: avg
+        sql: quantity
+      
+      - name: avg_unit_price
+        type: avg
+        sql: unit_price
+
+    pre_aggregations:
+      - name: order_items_rollup
+        measures:
+          - count
+          - total_quantity
+          - total_amount
+          - total_discount_amount
+        dimensions:
+          - product_id
+        time_dimension: created_at
+        granularity: day
+        partition_granularity: month
+        refresh_key:
+          every: 15 minutes

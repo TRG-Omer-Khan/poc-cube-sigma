@@ -1,0 +1,47 @@
+views:
+  - name: customer_360
+    description: "360-degree view of customer data including orders and interactions"
+
+    cubes:
+      # Base customers cube
+      - join_path: customers
+        includes:
+          - customer_id
+          - first_name
+          - last_name
+          - email
+          - phone
+          - company
+          - job_title
+          - department
+          - industry
+          - city
+          - state
+          - country
+          - lead_source
+          - lead_status
+          - lead_score
+          - is_active
+          - created_at
+          - last_contacted_at
+          - count
+          - active_customers
+          - avg_lead_score
+
+      # Orders related to customers
+      - join_path: orders
+        prefix: true
+        includes:
+          - count
+          - total_revenue
+          - avg_order_value
+          - completed_orders
+          - pending_orders
+          - order_date
+
+      # Order items through orders
+      - join_path: orders.order_items
+        prefix: true
+        includes:
+          - total_quantity
+          - total_amount

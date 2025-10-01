@@ -1,0 +1,195 @@
+cubes:
+  - name: orders
+    sql_table: postgresql.public.orders
+
+    joins:
+      - name: customers
+        sql: "{CUBE.customer_id} = {customers.customer_id}"
+        relationship: many_to_one
+
+    dimensions:
+      - name: order_id
+        sql: order_id
+        type: number
+        primary_key: true
+
+      - name: customer_id
+        sql: customer_id
+        type: number
+
+      - name: order_number
+        sql: order_number
+        type: string
+
+      - name: order_status
+        sql: order_status
+        type: string
+
+      - name: payment_status
+        sql: payment_status
+        type: string
+
+      - name: payment_method
+        sql: payment_method
+        type: string
+
+      - name: subtotal
+        sql: CAST(subtotal AS DECIMAL(10,2))
+        type: number
+
+      - name: tax_amount
+        sql: CAST(tax_amount AS DECIMAL(10,2))
+        type: number
+
+      - name: shipping_amount
+        sql: CAST(shipping_amount AS DECIMAL(10,2))
+        type: number
+
+      - name: discount_amount
+        sql: CAST(discount_amount AS DECIMAL(10,2))
+        type: number
+
+      - name: total_amount
+        sql: CAST(total_amount AS DECIMAL(10,2))
+        type: number
+
+      - name: currency
+        sql: currency
+        type: string
+
+      - name: shipping_address_line1
+        sql: shipping_address_line1
+        type: string
+
+      - name: shipping_address_line2
+        sql: shipping_address_line2
+        type: string
+
+      - name: shipping_city
+        sql: shipping_city
+        type: string
+
+      - name: shipping_state
+        sql: shipping_state
+        type: string
+
+      - name: shipping_postal_code
+        sql: shipping_postal_code
+        type: string
+
+      - name: shipping_country
+        sql: shipping_country
+        type: string
+
+      - name: billing_address_line1
+        sql: billing_address_line1
+        type: string
+
+      - name: billing_address_line2
+        sql: billing_address_line2
+        type: string
+
+      - name: billing_city
+        sql: billing_city
+        type: string
+
+      - name: billing_state
+        sql: billing_state
+        type: string
+
+      - name: billing_postal_code
+        sql: billing_postal_code
+        type: string
+
+      - name: billing_country
+        sql: billing_country
+        type: string
+
+      - name: tracking_number
+        sql: tracking_number
+        type: string
+
+      - name: carrier
+        sql: carrier
+        type: string
+
+      - name: notes
+        sql: notes
+        type: string
+
+      - name: metadata
+        sql: metadata
+        type: string
+
+      - name: created_at
+        sql: created_at
+        type: time
+
+      - name: updated_at
+        sql: updated_at
+        type: time
+
+      - name: order_date
+        sql: order_date
+        type: time
+
+      - name: ship_date
+        sql: ship_date
+        type: time
+
+      - name: delivery_date
+        sql: delivery_date
+        type: time
+
+    measures:
+      - name: count
+        type: count
+      
+      - name: total_revenue
+        type: sum
+        sql: CAST(total_amount AS DECIMAL(10,2))
+      
+      - name: avg_order_value
+        type: avg
+        sql: CAST(total_amount AS DECIMAL(10,2))
+      
+      - name: total_tax
+        type: sum
+        sql: CAST(tax_amount AS DECIMAL(10,2))
+      
+      - name: total_shipping
+        type: sum
+        sql: CAST(shipping_amount AS DECIMAL(10,2))
+      
+      - name: total_discount
+        type: sum
+        sql: CAST(discount_amount AS DECIMAL(10,2))
+      
+      - name: completed_orders
+        type: count
+        filters:
+          - sql: "{CUBE.order_status} = 'completed'"
+      
+      - name: pending_orders
+        type: count
+        filters:
+          - sql: "{CUBE.order_status} = 'pending'"
+
+    pre_aggregations:
+      - name: orders_summary
+        measures:
+          - count
+          - total_revenue
+          - avg_order_value
+          - completed_orders
+          - pending_orders
+        dimensions:
+          - order_status
+          - payment_status
+          - payment_method
+          - shipping_country
+        time_dimension: order_date
+        granularity: day
+        partition_granularity: month
+        refresh_key:
+          every: 15 minutes
