@@ -169,7 +169,6 @@ data:
         }
       }
     });
-
   Orders.js: |
     cube(`Orders`, {
       sql: `SELECT * FROM public.orders`,
@@ -360,7 +359,6 @@ data:
         }
       }
     });
-
   Products.js: |
     cube(`Products`, {
       sql: `SELECT * FROM public.products`,
@@ -476,7 +474,6 @@ data:
         }
       }
     });
-
   OrderItems.js: |
     cube(`OrderItems`, {
       sql: `SELECT * FROM public.order_items`,
@@ -563,7 +560,6 @@ data:
         }
       }
     });
-
   SalesView.js: |
     view(`Sales`, {
       description: `A unified view for sales analysis.`,
@@ -614,3 +610,31 @@ data:
         }
       ]
     });
+  CustomerOrders.js: |2-
+      view(`CustomerOrders`, {
+        description: `Customer orders analysis view`,
+
+        cubes: [
+          {
+            joinPath: Orders,
+            includes: [
+              `order_id`,
+              `order_date`,
+              `order_status`,
+              `total_amount`,
+              `count`
+            ]
+          },
+          {
+            joinPath: Orders.Customers,
+            prefix: true,
+            includes: [
+              `first_name`,
+              `last_name`,
+              `email`,
+              `company`,
+              `city`
+            ]
+          }
+        ]
+      });
