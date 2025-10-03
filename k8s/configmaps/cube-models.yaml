@@ -4,165 +4,613 @@ metadata:
   name: cube-models
   namespace: stcs
 data:
-  customers.yml: |
-    cubes:
-      - name: customers
-        sql_table: postgresql.public.customers
+  Customers.js: |
+    cube(`Customers`, {
+      sql: `SELECT * FROM public.customers`,
 
-        joins: []
+      joins: {},
 
-        dimensions:
-          - name: customer_id
-            sql: customer_id
-            type: number
-            primary_key: true
+      dimensions: {
+        customer_id: {
+          sql: `customer_id`,
+          type: `number`,
+          primaryKey: true
+        },
+        
+        lead_score: {
+          sql: `lead_score`,
+          type: `number`
+        },
+        
+        external_id: {
+          sql: `external_id`,
+          type: `string`
+        },
+        
+        first_name: {
+          sql: `first_name`,
+          type: `string`
+        },
+        
+        last_name: {
+          sql: `last_name`,
+          type: `string`
+        },
+        
+        email: {
+          sql: `email`,
+          type: `string`
+        },
+        
+        phone: {
+          sql: `phone`,
+          type: `string`
+        },
+        
+        mobile_phone: {
+          sql: `mobile_phone`,
+          type: `string`
+        },
+        
+        company: {
+          sql: `company`,
+          type: `string`
+        },
+        
+        job_title: {
+          sql: `job_title`,
+          type: `string`
+        },
+        
+        department: {
+          sql: `department`,
+          type: `string`
+        },
+        
+        industry: {
+          sql: `industry`,
+          type: `string`
+        },
+        
+        website: {
+          sql: `website`,
+          type: `string`
+        },
+        
+        linkedin_profile: {
+          sql: `linkedin_profile`,
+          type: `string`
+        },
+        
+        twitter_handle: {
+          sql: `twitter_handle`,
+          type: `string`
+        },
+        
+        address_line1: {
+          sql: `address_line1`,
+          type: `string`
+        },
+        
+        address_line2: {
+          sql: `address_line2`,
+          type: `string`
+        },
+        
+        city: {
+          sql: `city`,
+          type: `string`
+        },
+        
+        state: {
+          sql: `state`,
+          type: `string`
+        },
+        
+        postal_code: {
+          sql: `postal_code`,
+          type: `string`
+        },
+        
+        country: {
+          sql: `country`,
+          type: `string`
+        },
+        
+        timezone: {
+          sql: `timezone`,
+          type: `string`
+        },
+        
+        lead_source: {
+          sql: `lead_source`,
+          type: `string`
+        },
+        
+        lead_status: {
+          sql: `lead_status`,
+          type: `string`
+        },
+        
+        notes: {
+          sql: `notes`,
+          type: `string`
+        },
+        
+        is_active: {
+          sql: `is_active`,
+          type: `boolean`
+        },
+        
+        metadata: {
+          sql: `metadata`,
+          type: `string`
+        },
+        
+        created_at: {
+          sql: `created_at`,
+          type: `time`
+        },
+        
+        updated_at: {
+          sql: `updated_at`,
+          type: `time`
+        },
+        
+        last_contacted_at: {
+          sql: `last_contacted_at`,
+          type: `time`
+        }
+      },
 
-          - name: lead_score
-            sql: lead_score
-            type: number
+      measures: {
+        count: {
+          type: `count`
+        }
+      }
+    });
 
-          - name: external_id
-            sql: external_id
-            type: string
+  Orders.js: |
+    cube(`Orders`, {
+      sql: `SELECT * FROM public.orders`,
 
-          - name: first_name
-            sql: first_name
-            type: string
+      joins: {
+        Customers: {
+          sql: `${CUBE}.customer_id = ${Customers}.customer_id`,
+          relationship: `many_to_one`
+        },
+        
+        OrderItems: {
+          sql: `${CUBE}.order_id = ${OrderItems}.order_id`,
+          relationship: `one_to_many`
+        }
+      },
 
-          - name: last_name
-            sql: last_name
-            type: string
+      dimensions: {
+        order_id: {
+          sql: `order_id`,
+          type: `number`,
+          primaryKey: true
+        },
+        
+        customer_id: {
+          sql: `customer_id`,
+          type: `number`
+        },
+        
+        order_number: {
+          sql: `order_number`,
+          type: `string`
+        },
+        
+        order_status: {
+          sql: `order_status`,
+          type: `string`
+        },
+        
+        payment_status: {
+          sql: `payment_status`,
+          type: `string`
+        },
+        
+        payment_method: {
+          sql: `payment_method`,
+          type: `string`
+        },
+        
+        subtotal: {
+          sql: `subtotal`,
+          type: `string`
+        },
+        
+        tax_amount: {
+          sql: `tax_amount`,
+          type: `string`
+        },
+        
+        shipping_amount: {
+          sql: `shipping_amount`,
+          type: `string`
+        },
+        
+        discount_amount: {
+          sql: `discount_amount`,
+          type: `string`
+        },
+        
+        total_amount: {
+          sql: `total_amount`,
+          type: `string`
+        },
+        
+        currency: {
+          sql: `currency`,
+          type: `string`
+        },
+        
+        shipping_address_line1: {
+          sql: `shipping_address_line1`,
+          type: `string`
+        },
+        
+        shipping_address_line2: {
+          sql: `shipping_address_line2`,
+          type: `string`
+        },
+        
+        shipping_city: {
+          sql: `shipping_city`,
+          type: `string`
+        },
+        
+        shipping_state: {
+          sql: `shipping_state`,
+          type: `string`
+        },
+        
+        shipping_postal_code: {
+          sql: `shipping_postal_code`,
+          type: `string`
+        },
+        
+        shipping_country: {
+          sql: `shipping_country`,
+          type: `string`
+        },
+        
+        billing_address_line1: {
+          sql: `billing_address_line1`,
+          type: `string`
+        },
+        
+        billing_address_line2: {
+          sql: `billing_address_line2`,
+          type: `string`
+        },
+        
+        billing_city: {
+          sql: `billing_city`,
+          type: `string`
+        },
+        
+        billing_state: {
+          sql: `billing_state`,
+          type: `string`
+        },
+        
+        billing_postal_code: {
+          sql: `billing_postal_code`,
+          type: `string`
+        },
+        
+        billing_country: {
+          sql: `billing_country`,
+          type: `string`
+        },
+        
+        tracking_number: {
+          sql: `tracking_number`,
+          type: `string`
+        },
+        
+        carrier: {
+          sql: `carrier`,
+          type: `string`
+        },
+        
+        notes: {
+          sql: `notes`,
+          type: `string`
+        },
+        
+        metadata: {
+          sql: `metadata`,
+          type: `string`
+        },
+        
+        created_at: {
+          sql: `created_at`,
+          type: `time`
+        },
+        
+        updated_at: {
+          sql: `updated_at`,
+          type: `time`
+        },
+        
+        order_date: {
+          sql: `order_date`,
+          type: `time`
+        },
+        
+        ship_date: {
+          sql: `ship_date`,
+          type: `time`
+        },
+        
+        delivery_date: {
+          sql: `delivery_date`,
+          type: `time`
+        }
+      },
 
-          - name: email
-            sql: email
-            type: string
+      measures: {
+        count: {
+          type: `count`
+        }
+      }
+    });
 
-          - name: phone
-            sql: phone
-            type: string
+  Products.js: |
+    cube(`Products`, {
+      sql: `SELECT * FROM public.products`,
 
-          - name: mobile_phone
-            sql: mobile_phone
-            type: string
+      joins: {},
 
-          - name: company
-            sql: company
-            type: string
+      dimensions: {
+        product_id: {
+          sql: `product_id`,
+          type: `number`,
+          primaryKey: true
+        },
+        
+        inventory_quantity: {
+          sql: `inventory_quantity`,
+          type: `number`
+        },
+        
+        reorder_level: {
+          sql: `reorder_level`,
+          type: `number`
+        },
+        
+        sku: {
+          sql: `sku`,
+          type: `string`
+        },
+        
+        product_name: {
+          sql: `product_name`,
+          type: `string`
+        },
+        
+        product_description: {
+          sql: `product_description`,
+          type: `string`
+        },
+        
+        category: {
+          sql: `category`,
+          type: `string`
+        },
+        
+        subcategory: {
+          sql: `subcategory`,
+          type: `string`
+        },
+        
+        brand: {
+          sql: `brand`,
+          type: `string`
+        },
+        
+        price: {
+          sql: `price`,
+          type: `string`
+        },
+        
+        cost: {
+          sql: `cost`,
+          type: `string`
+        },
+        
+        currency: {
+          sql: `currency`,
+          type: `string`
+        },
+        
+        weight: {
+          sql: `weight`,
+          type: `string`
+        },
+        
+        dimensions: {
+          sql: `dimensions`,
+          type: `string`
+        },
+        
+        is_active: {
+          sql: `is_active`,
+          type: `boolean`
+        },
+        
+        metadata: {
+          sql: `metadata`,
+          type: `string`
+        },
+        
+        created_at: {
+          sql: `created_at`,
+          type: `time`
+        },
+        
+        updated_at: {
+          sql: `updated_at`,
+          type: `time`
+        },
+        
+        launch_date: {
+          sql: `CAST(launch_date AS TIMESTAMP)`,
+          type: `time`
+        },
+        
+        discontinue_date: {
+          sql: `CAST(discontinue_date AS TIMESTAMP)`,
+          type: `time`
+        }
+      },
 
-          - name: job_title
-            sql: job_title
-            type: string
+      measures: {
+        count: {
+          type: `count`
+        }
+      }
+    });
 
-          - name: department
-            sql: department
-            type: string
+  OrderItems.js: |
+    cube(`OrderItems`, {
+      sql: `SELECT * FROM public.order_items`,
 
-          - name: industry
-            sql: industry
-            type: string
+      joins: {
+        Orders: {
+          sql: `${CUBE}.order_id = ${Orders}.order_id`,
+          relationship: `many_to_one`
+        },
+        
+        Products: {
+          sql: `${CUBE}.product_id = ${Products}.product_id`,
+          relationship: `many_to_one`
+        }
+      },
 
-          - name: website
-            sql: website
-            type: string
+      dimensions: {
+        item_id: {
+          sql: `item_id`,
+          type: `number`,
+          primaryKey: true
+        },
+        
+        order_id: {
+          sql: `order_id`,
+          type: `number`
+        },
+        
+        product_id: {
+          sql: `product_id`,
+          type: `number`
+        },
+        
+        product_name: {
+          sql: `${Products.product_name}`,
+          type: `string`
+        },
+        
+        quantity: {
+          sql: `quantity`,
+          type: `number`
+        },
+        
+        unit_price: {
+          sql: `unit_price`,
+          type: `number`
+        },
+        
+        discount_percent: {
+          sql: `discount_percent`,
+          type: `string`
+        },
+        
+        tax_rate: {
+          sql: `tax_rate`,
+          type: `string`
+        },
+        
+        total_price: {
+          sql: `total_price`,
+          type: `string`
+        },
+        
+        notes: {
+          sql: `notes`,
+          type: `string`
+        },
+        
+        created_at: {
+          sql: `created_at`,
+          type: `time`
+        }
+      },
 
-          - name: linkedin_profile
-            sql: linkedin_profile
-            type: string
+      measures: {
+        count: {
+          type: `count`
+        },
+        
+        total_amount: {
+          description: `The total amount for each line item (quantity * unit_price).`,
+          type: `sum`,
+          sql: `${CUBE.quantity} * ${CUBE.unit_price}`
+        }
+      }
+    });
 
-          - name: twitter_handle
-            sql: twitter_handle
-            type: string
-
-          - name: address_line1
-            sql: address_line1
-            type: string
-
-          - name: address_line2
-            sql: address_line2
-            type: string
-
-          - name: city
-            sql: city
-            type: string
-
-          - name: state
-            sql: state
-            type: string
-
-          - name: postal_code
-            sql: postal_code
-            type: string
-
-          - name: country
-            sql: country
-            type: string
-
-          - name: timezone
-            sql: timezone
-            type: string
-
-          - name: lead_source
-            sql: lead_source
-            type: string
-
-          - name: lead_status
-            sql: lead_status
-            type: string
-
-          - name: notes
-            sql: notes
-            type: string
-
-          - name: tags
-            sql: tags
-            type: string
-
-          - name: is_active
-            sql: is_active
-            type: boolean
-
-          - name: metadata
-            sql: metadata
-            type: string
-
-          - name: created_at
-            sql: created_at
-            type: time
-
-          - name: updated_at
-            sql: updated_at
-            type: time
-
-          - name: last_contacted_at
-            sql: last_contacted_at
-            type: time
-
-        measures:
-          - name: count
-            type: count
-          
-          - name: active_customers
-            type: count
-            filters:
-              - sql: "{CUBE.is_active} = true"
-          
-          - name: avg_lead_score
-            type: avg
-            sql: lead_score
-
-        pre_aggregations:
-          - name: customers_rollup
-            measures:
-              - count
-              - active_customers
-              - avg_lead_score
-            dimensions:
-              - lead_status
-              - lead_source
-              - country
-              - industry
-            time_dimension: created_at
-            granularity: month
-            partition_granularity: month
-            refresh_key:
-              every: 1 hour
+  SalesView.js: |
+    view(`Sales`, {
+      description: `A unified view for sales analysis.`,
+      
+      cubes: [
+        {
+          joinPath: Orders,
+          includes: [
+            `count`,
+            `order_status`,
+            `order_date`,
+            `order_id`,
+            `payment_status`,
+            `payment_method`
+          ]
+        },
+        {
+          joinPath: Orders.Customers,
+          prefix: true,
+          includes: [
+            `company`,
+            `email`,
+            `city`,
+            `country`,
+            `lead_source`,
+            `customer_id`,
+            `count`
+          ]
+        },
+        {
+          joinPath: Orders.OrderItems,
+          prefix: true,
+          includes: [
+            `count`,
+            `total_amount`
+          ]
+        },
+        {
+          joinPath: Orders.OrderItems.Products,
+          prefix: true,
+          includes: [
+            `product_name`,
+            `sku`,
+            `category`,
+            `subcategory`,
+            `brand`
+          ]
+        }
+      ]
+    });

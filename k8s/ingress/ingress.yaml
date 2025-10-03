@@ -102,4 +102,8 @@ spec:
     targetPort: 15432
     protocol: TCP
     name: sql-api
+  - port: 13306
+    targetPort: 13306
+    protocol: TCP
+    name: mysql-api
   type: LoadBalancer

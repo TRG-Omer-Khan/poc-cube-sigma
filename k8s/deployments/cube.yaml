@@ -53,6 +53,10 @@ spec:
           value: "15432"
         - name: CUBEJS_PG_SQL_PORT
           value: "15432"
+        - name: CUBEJS_SQL_API
+          value: "true"
+        - name: CUBESTORE_SQL_PORT
+          value: "13306"
         - name: CUBEJS_SQL_USER
           valueFrom:
             secretKeyRef:
@@ -79,7 +83,20 @@ spec:
           mountPath: /cube/conf/cube.js
           subPath: cube.js
         - name: cube-models-volume
-          mountPath: /cube/conf/model
+          mountPath: /cube/conf/model/Customers.js
+          subPath: Customers.js
+        - name: cube-models-volume
+          mountPath: /cube/conf/model/Orders.js
+          subPath: Orders.js
+        - name: cube-models-volume
+          mountPath: /cube/conf/model/Products.js
+          subPath: Products.js
+        - name: cube-models-volume
+          mountPath: /cube/conf/model/OrderItems.js
+          subPath: OrderItems.js
+        - name: cube-models-volume
+          mountPath: /cube/conf/model/SalesView.js
+          subPath: SalesView.js
         readinessProbe:
           httpGet:
             path: /cubejs-api/v1/meta

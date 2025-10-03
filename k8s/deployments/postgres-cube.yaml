@@ -29,6 +29,8 @@ spec:
           value: "cube"
         - name: POSTGRES_PASSWORD
           value: "cube123"
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
         resources:
           requests:
             memory: "512Mi"
